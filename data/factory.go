@@ -40,6 +40,7 @@ const (
 	CHECK_CASH      TransactionType = 17
 	CHECK_CANCEL    TransactionType = 18
 	TRUST_SET       TransactionType = 20
+	ACCOUNT_DELETE  TransactionType = 21
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
 )
@@ -70,6 +71,7 @@ var TxFactory = [...]func() Transaction{
 	OFFER_CREATE:    func() Transaction { return &OfferCreate{TxBase: TxBase{TransactionType: OFFER_CREATE}} },
 	OFFER_CANCEL:    func() Transaction { return &OfferCancel{TxBase: TxBase{TransactionType: OFFER_CANCEL}} },
 	TRUST_SET:       func() Transaction { return &TrustSet{TxBase: TxBase{TransactionType: TRUST_SET}} },
+	ACCOUNT_DELETE:  func() Transaction { return &AccountDelete{TxBase: TxBase{TransactionType: ACCOUNT_DELETE}} },
 	AMENDMENT:       func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
 	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
 	ESCROW_CREATE:   func() Transaction { return &EscrowCreate{TxBase: TxBase{TransactionType: ESCROW_CREATE}} },
@@ -121,6 +123,7 @@ var txNames = [...]string{
 	OFFER_CREATE:    "OfferCreate",
 	OFFER_CANCEL:    "OfferCancel",
 	TRUST_SET:       "TrustSet",
+	ACCOUNT_DELETE:  "AccountDelete",
 	AMENDMENT:       "EnableAmendment",
 	SET_FEE:         "SetFee",
 	ESCROW_CREATE:   "EscrowCreate",
@@ -142,6 +145,7 @@ var txTypes = map[string]TransactionType{
 	"OfferCreate":          OFFER_CREATE,
 	"OfferCancel":          OFFER_CANCEL,
 	"TrustSet":             TRUST_SET,
+	"AccountDelete":        ACCOUNT_DELETE,
 	"EnableAmendment":      AMENDMENT,
 	"SetFee":               SET_FEE,
 	"EscrowCreate":         ESCROW_CREATE,

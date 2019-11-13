@@ -27,6 +27,11 @@ type Payment struct {
 	InvoiceID      *Hash256 `json:",omitempty"`
 }
 
+type AccountDelete struct {
+	TxBase
+	Destination Account
+}
+
 type AccountSet struct {
 	TxBase
 	EmailHash     *Hash128        `json:",omitempty"`
