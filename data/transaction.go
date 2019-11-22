@@ -29,7 +29,8 @@ type Payment struct {
 
 type AccountDelete struct {
 	TxBase
-	Destination Account
+	Destination    Account
+	DestinationTag *uint32 `json:",omitempty"`
 }
 
 type AccountSet struct {
