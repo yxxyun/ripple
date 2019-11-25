@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rubblelabs/ripple/data"
-	"github.com/rubblelabs/ripple/terminal"
-	"github.com/rubblelabs/ripple/websockets"
+	"github.com/yxxyun/ripple/data"
+	"github.com/yxxyun/ripple/terminal"
+	"github.com/yxxyun/ripple/websockets"
 )
 
 const usage = `Usage: book [currency currency] [options]
