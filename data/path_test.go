@@ -9,7 +9,7 @@ type PathSuite struct{}
 var _ = Suite(&PathSuite{})
 
 func (s *PathSuite) TestPathElemOffer(c *C) {
-	pe, err := newPathElem("BTC/rNPRNzBB92BVpAhhZr4iXDTveCgV5Pofm9")
+	pe, err := NewPathElem("BTC/rNPRNzBB92BVpAhhZr4iXDTveCgV5Pofm9")
 	c.Assert(err, IsNil)
 
 	c.Assert(pe.Account, IsNil)
@@ -18,7 +18,7 @@ func (s *PathSuite) TestPathElemOffer(c *C) {
 }
 
 func (s *PathSuite) TestPathElemAccount(c *C) {
-	pe, err := newPathElem("rNPRNzBB92BVpAhhZr4iXDTveCgV5Pofm9")
+	pe, err := NewPathElem("rNPRNzBB92BVpAhhZr4iXDTveCgV5Pofm9")
 	c.Assert(err, IsNil)
 
 	c.Assert(pe.Account.String(), Equals, "rNPRNzBB92BVpAhhZr4iXDTveCgV5Pofm9")
@@ -27,7 +27,7 @@ func (s *PathSuite) TestPathElemAccount(c *C) {
 }
 
 func (s *PathSuite) TestPathElemError(c *C) {
-	_, err := newPathElem("Foo")
+	_, err := NewPathElem("Foo")
 	c.Assert(err.Error(), Equals, "Base58 string too short: Foo")
 }
 
