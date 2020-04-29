@@ -5,7 +5,7 @@ type TxBase struct {
 	Flags              *TransactionFlag `json:",omitempty"`
 	SourceTag          *uint32          `json:",omitempty"`
 	Account            Account
-	Sequence           uint32 `json:",omitempty"`
+	Sequence           uint32
 	Fee                Value
 	AccountTxnID       *Hash256        `json:",omitempty"`
 	SigningPubKey      *PublicKey      `json:",omitempty"`

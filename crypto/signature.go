@@ -1,9 +1,8 @@
 package crypto
 
 import (
+	"crypto/ed25519"
 	"fmt"
-
-	"golang.org/x/crypto/ed25519"
 
 	"github.com/btcsuite/btcd/btcec"
 )

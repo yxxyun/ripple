@@ -2,9 +2,8 @@ package crypto
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"crypto/rand"
-
-	"golang.org/x/crypto/ed25519"
 )
 
 type ed25519key struct {

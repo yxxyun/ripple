@@ -221,20 +221,20 @@ func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
 }
 
 // Synchronously submit unsigned transaction
-func (r *Remote) SubmitSign(tx data.Transaction, seed, keytype string) (*SubmitResult, error) {
-	cmd := &SubmitSignCommand{
-		Command: newCommand("submit"),
-		Tx:      tx,
-		KeyType: keytype,
-		Seed:    seed,
-	}
-	r.outgoing <- cmd
-	<-cmd.Ready
-	if cmd.CommandError != nil {
-		return nil, cmd.CommandError
-	}
-	return cmd.Result, nil
-}
+// func (r *Remote) SubmitSign(tx data.Transaction, seed, keytype string) (*SubmitResult, error) {
+// 	cmd := &SubmitSignCommand{
+// 		Command: newCommand("submit"),
+// 		Tx:      tx,
+// 		KeyType: keytype,
+// 		Seed:    seed,
+// 	}
+// 	r.outgoing <- cmd
+// 	<-cmd.Ready
+// 	if cmd.CommandError != nil {
+// 		return nil, cmd.CommandError
+// 	}
+// 	return cmd.Result, nil
+// }
 
 // Synchronously submit multiple transactions
 func (r *Remote) SubmitBatch(txs []data.Transaction) ([]*SubmitResult, error) {
