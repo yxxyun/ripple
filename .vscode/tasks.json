@@ -38,7 +38,8 @@
                     "GOOS": "windows",
                     "GOARCH": "386"
                 }
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "ModInit",

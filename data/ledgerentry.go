@@ -48,7 +48,7 @@ type Offer struct {
 	leBase
 	Flags         *LedgerEntryFlag `json:",omitempty"`
 	Account       *Account         `json:",omitempty"`
-	Sequence      *uint32          `json:"sequence,omitempty"`
+	Sequence      *uint32          `json:",omitempty"`
 	TakerPays     *Amount          `json:",omitempty"`
 	TakerGets     *Amount          `json:",omitempty"`
 	BookDirectory *Hash256         `json:",omitempty"`
@@ -103,16 +103,17 @@ type FeeSettings struct {
 
 type Escrow struct {
 	leBase
-	Flags          *LedgerEntryFlag `json:",omitempty"`
-	Account        Account          `json:",omitempty"`
-	Destination    Account          `json:",omitempty"`
-	Amount         Amount           `json:",omitempty"`
-	Condition      *VariableLength  `json:",omitempty"`
-	CancelAfter    *uint32          `json:",omitempty"`
-	FinishAfter    *uint32          `json:",omitempty"`
-	SourceTag      *uint32          `json:",omitempty"`
-	DestinationTag *uint32          `json:",omitempty"`
-	OwnerNode      *NodeIndex       `json:",omitempty"`
+	Flags           *LedgerEntryFlag `json:",omitempty"`
+	Account         Account          `json:",omitempty"`
+	Destination     Account          `json:",omitempty"`
+	Amount          Amount           `json:",omitempty"`
+	Condition       *VariableLength  `json:",omitempty"`
+	CancelAfter     *uint32          `json:",omitempty"`
+	FinishAfter     *uint32          `json:",omitempty"`
+	SourceTag       *uint32          `json:",omitempty"`
+	DestinationTag  *uint32          `json:",omitempty"`
+	OwnerNode       *NodeIndex       `json:",omitempty"`
+	DestinationNode *NodeIndex       `json:",omitempty"`
 }
 
 type SignerEntry struct {
@@ -164,6 +165,14 @@ type Check struct {
 	Sequence    *uint32  `json:",omitempty"`
 }
 
+type DepositPreAuth struct {
+	leBase
+	Account   *Account         `json:",omitempty"`
+	Authorize *Account         `json:",omitempty"`
+	Flags     *LedgerEntryFlag `json:",omitempty"`
+	OwnerNode *NodeIndex       `json:",omitempty"`
+}
+
 func (a *AccountRoot) Affects(account Account) bool {
 	return a.Account != nil && a.Account.Equals(account)
 }
@@ -193,7 +202,9 @@ func (p *PayChannel) Affects(account Account) bool {
 func (p *Check) Affects(account Account) bool {
 	return (p.Account != nil && p.Account.Equals(account)) || (p.Destination != nil && p.Destination.Equals(account))
 }
-
+func (d *DepositPreAuth) Affects(account Account) bool {
+	return (d.Account != nil && d.Account.Equals(account)) || (d.Authorize != nil && d.Authorize.Equals(account))
+}
 func (le *leBase) GetType() string                     { return ledgerEntryNames[le.LedgerEntryType] }
 func (le *leBase) GetLedgerEntryType() LedgerEntryType { return le.LedgerEntryType }
 func (le *leBase) Prefix() HashPrefix                  { return HP_LEAF_NODE }
