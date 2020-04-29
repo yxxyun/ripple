@@ -50,7 +50,7 @@ func main() {
 	pays, err := data.NewAsset(os.Args[2])
 	checkErr(err)
 	var zeroAccount data.Account
-	result, err := remote.BookOffers(zeroAccount, "closed", *pays, *gets)
+	result, err := remote.BookOffers(zeroAccount, "closed", *pays, *gets, 20)
 	checkErr(err)
 	// fmt.Println(*result.LedgerSequence) //TODO: wait for nikb fix
 	for _, offer := range result.Offers {
