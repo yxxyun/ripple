@@ -31,7 +31,7 @@ func Verify(publicKey, hash, msg, signature []byte) (bool, error) {
 
 func signEd25519(privateKey, msg []byte) ([]byte, error) {
 	p := make(ed25519.PrivateKey, ed25519.PrivateKeySize)
-	copy(p, privateKey[:])
+	copy(p[:], privateKey)
 	return ed25519.Sign(p, msg)[:], nil
 }
 

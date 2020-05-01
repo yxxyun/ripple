@@ -40,5 +40,5 @@ func NewEd25519Key(seed []byte) (*ed25519key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ed25519key{priv}, nil
+	return &ed25519key{priv: priv}, nil
 }
