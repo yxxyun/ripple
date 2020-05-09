@@ -11,9 +11,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"github.com/yxxyun/ripple/data"
+	"k8s.io/klog/v2"
 )
 
 const (
@@ -39,7 +39,7 @@ type Remote struct {
 // NewRemote returns a new remote session connected to the specified
 // server endpoint URI. To close the connection, use Close().
 func NewRemote(endpoint string) (*Remote, error) {
-	glog.Infoln(endpoint)
+	klog.Infoln(endpoint)
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (r *Remote) Close() {
 
 	// Drain the Incoming channel and block until it is closed,
 	// indicating that this Remote is fully cleaned up.
-	for _ = range r.Incoming {
+	for range r.Incoming {
 	}
 }
 
@@ -91,7 +91,7 @@ func (r *Remote) run() {
 
 		// Drain the inbound channel and block until it is closed,
 		// indicating that the readPump has returned.
-		for _ = range inbound {
+		for range inbound {
 		}
 	}()
 
@@ -119,12 +119,12 @@ func (r *Remote) run() {
 
 		case in, ok := <-inbound:
 			if !ok {
-				glog.Errorln("Connection closed by server")
+				klog.Errorln("Connection closed by server")
 				return
 			}
 
 			if err := json.Unmarshal(in, &response); err != nil {
-				glog.Errorln(err.Error())
+				klog.Errorln(err.Error())
 				continue
 			}
 			// Stream message
@@ -132,7 +132,7 @@ func (r *Remote) run() {
 			if ok {
 				cmd := factory()
 				if err := json.Unmarshal(in, &cmd); err != nil {
-					glog.Errorln(err.Error(), string(in))
+					klog.Errorln(err.Error(), string(in))
 					continue
 				}
 				r.Incoming <- cmd
@@ -142,12 +142,12 @@ func (r *Remote) run() {
 			// Command response message
 			cmd, ok := pending[response.Id]
 			if !ok {
-				glog.Errorf("Unexpected message: %+v", response)
+				klog.Errorf("Unexpected message: %+v", response)
 				continue
 			}
 			delete(pending, response.Id)
 			if err := json.Unmarshal(in, &cmd); err != nil {
-				glog.Errorln(err.Error())
+				klog.Errorln(err.Error())
 				continue
 			}
 			cmd.Done()
@@ -176,7 +176,7 @@ func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMet
 		r.outgoing <- cmd
 		<-cmd.Ready
 		if cmd.CommandError != nil {
-			glog.Errorln(cmd.Error())
+			klog.Errorln(cmd.Error())
 			return
 		}
 		for _, tx := range cmd.Result.Transactions {
@@ -281,21 +281,21 @@ func (r *Remote) streamLedgerData(ledger interface{}, c chan data.LedgerEntrySli
 		r.outgoing <- cmd
 		<-cmd.Ready
 		if cmd.CommandError != nil {
-			glog.Errorln(cmd.Error())
+			klog.Errorln(cmd.Error())
 			return
 		}
 		les := make(data.LedgerEntrySlice, len(cmd.Result.State))
 		for i, state := range cmd.Result.State {
 			b, err := hex.DecodeString(state.Data + state.Index)
 			if err != nil {
-				glog.Errorln(cmd.Error())
+				klog.Errorln(cmd.Error())
 				return
 			}
 			les[i], err = data.ReadLedgerEntry(bytes.NewReader(b), data.Hash256{})
 			if err != nil {
-				glog.Errorln(err.Error())
-				glog.Errorln(state.Data)
-				glog.Errorln(state.Index)
+				klog.Errorln(err.Error())
+				klog.Errorln(state.Data)
+				klog.Errorln(state.Index)
 				continue
 			}
 		}
@@ -533,10 +533,10 @@ func (r *Remote) readPump(inbound chan<- []byte) {
 	for {
 		_, message, err := r.ws.ReadMessage()
 		if err != nil {
-			glog.Errorln(err)
+			klog.Errorln(err)
 			return
 		}
-		glog.V(2).Infoln(dump(message))
+		klog.V(2).Infoln(dump(message))
 		r.ws.SetReadDeadline(time.Now().Add(pongWait))
 		inbound <- message
 	}
@@ -562,20 +562,20 @@ func (r *Remote) writePump(outbound <-chan interface{}) {
 			b, err := json.Marshal(message)
 			if err != nil {
 				// Outbound message cannot be JSON serialized (log it and continue)
-				glog.Errorln(err)
+				klog.Errorln(err)
 				continue
 			}
 
-			glog.V(2).Infoln(dump(b))
+			klog.V(2).Infoln(dump(b))
 			if err := r.ws.WriteMessage(websocket.TextMessage, b); err != nil {
-				glog.Errorln(err)
+				klog.Errorln(err)
 				return
 			}
 
 		// Time to send a ping
 		case <-ticker.C:
 			if err := r.ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				glog.Errorln(err)
+				klog.Errorln(err)
 				return
 			}
 		}

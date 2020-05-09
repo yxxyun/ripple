@@ -20,7 +20,7 @@ func checkErr(err error, quit bool) {
 }
 
 var (
-	host     = flag.String("host", "wss://s-east.ripple.com:443", "websockets host to connect to")
+	host     = flag.String("host", "wss://xrpl.ws:443", "websockets host to connect to")
 	proposed = flag.Bool("proposed", false, "include proposed transacions")
 )
 
@@ -28,7 +28,6 @@ func main() {
 	flag.Parse()
 	r, err := websockets.NewRemote(*host)
 	checkErr(err, true)
-
 	confirmation, err := r.Subscribe(true, !*proposed, *proposed, true)
 	checkErr(err, true)
 	terminal.Println(fmt.Sprint("Subscribed at: ", confirmation.LedgerSequence), terminal.Default)

@@ -11,10 +11,10 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/golang/glog"
 	"github.com/yxxyun/ripple/data"
 	"github.com/yxxyun/ripple/terminal"
 	"github.com/yxxyun/ripple/websockets"
+	"k8s.io/klog/v2"
 )
 
 const usage = `Usage: explain [tx hash|ledger sequence|ripple address|-] [options]
@@ -90,6 +90,7 @@ func explain(txm *data.TransactionWithMetaData, flag terminal.Flag) {
 }
 
 func main() {
+	klog.InitFlags(nil)
 	if len(os.Args) == 1 {
 		showUsage()
 	}
@@ -97,7 +98,7 @@ func main() {
 	matches := argumentRegex.FindStringSubmatch(os.Args[1])
 	r, err := websockets.NewRemote(*host)
 	checkErr(err)
-	glog.Infoln("Connected to: ", *host)
+	klog.Infoln("Connected to: ", *host)
 	switch {
 	case len(matches) == 0:
 		showUsage()
