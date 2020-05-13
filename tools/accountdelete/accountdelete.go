@@ -90,7 +90,7 @@ func main() {
 					Sequence:           accountSequence,
 				}
 				data.Sign(payment, key, &zero)
-				r.Submit(payment)
+				r.Submit(payment, true)
 				accountSequence++
 				ledgerSequence++
 			}
@@ -110,7 +110,7 @@ func main() {
 					Sequence:           accountSequence,
 				}
 				data.Sign(trust, key, &zero)
-				r.Submit(trust)
+				r.Submit(trust, true)
 				accountSequence++
 				ledgerSequence++
 			}
@@ -129,7 +129,7 @@ func main() {
 		Sequence:           accountSequence,
 	}
 	checkErr(data.Sign(tx, key, &zero), true)
-	ret, err := r.Submit(tx)
+	ret, err := r.Submit(tx, true)
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {

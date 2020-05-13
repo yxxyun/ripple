@@ -126,8 +126,9 @@ func (txr *TxResult) UnmarshalJSON(b []byte) error {
 
 type SubmitCommand struct {
 	*Command
-	TxBlob string        `json:"tx_blob"`
-	Result *SubmitResult `json:"result,omitempty"`
+	TxBlob   string        `json:"tx_blob"`
+	FailHard bool          `json:"fail_hard,omitempty"`
+	Result   *SubmitResult `json:"result,omitempty"`
 }
 
 // type SubmitSignCommand struct {
@@ -139,11 +140,20 @@ type SubmitCommand struct {
 // }
 
 type SubmitResult struct {
-	EngineResult        data.TransactionResult `json:"engine_result"`
-	EngineResultCode    int                    `json:"engine_result_code"`
-	EngineResultMessage string                 `json:"engine_result_message"`
-	TxBlob              string                 `json:"tx_blob"`
-	Tx                  interface{}            `json:"tx_json"`
+	EngineResult             data.TransactionResult `json:"engine_result"`
+	EngineResultCode         int                    `json:"engine_result_code"`
+	EngineResultMessage      string                 `json:"engine_result_message"`
+	TxBlob                   string                 `json:"tx_blob"`
+	Tx                       interface{}            `json:"tx_json"`
+	Accepted                 bool                   `json:"accepted,omitempty"`
+	AccountSequenceAvailable uint32                 `json:"account_sequence_available,omitempty"`
+	AccountSequenceNext      uint32                 `json:"account_sequence_next,omitempty"`
+	Applied                  bool                   `json:"applied,omitempty"`
+	Broadcast                bool                   `json:"broadcast,omitempty"`
+	Kept                     bool                   `json:"kept,omitempty"`
+	Queued                   bool                   `json:"queued,omitempty"`
+	OpenLedgerCost           data.Value             `json:"open_ledger_cost,omitempty"`
+	ValidatedLedgerIndex     uint32                 `json:"validated_ledger_index,omitempty"`
 }
 
 type LedgerCommand struct {

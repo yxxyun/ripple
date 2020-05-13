@@ -203,14 +203,15 @@ func (r *Remote) AccountTx(account data.Account, pageSize int, minLedger, maxLed
 }
 
 // Synchronously submit a single transaction
-func (r *Remote) Submit(tx data.Transaction) (*SubmitResult, error) {
+func (r *Remote) Submit(tx data.Transaction, failhard bool) (*SubmitResult, error) {
 	_, raw, err := data.Raw(tx)
 	if err != nil {
 		return nil, err
 	}
 	cmd := &SubmitCommand{
-		Command: newCommand("submit"),
-		TxBlob:  fmt.Sprintf("%X", raw),
+		Command:  newCommand("submit"),
+		TxBlob:   fmt.Sprintf("%X", raw),
+		FailHard: failhard,
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
