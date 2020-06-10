@@ -20,15 +20,23 @@ func checkErr(err error, quit bool) {
 }
 
 var (
-	host = flag.String("host", "wss://s.devnet.rippletest.net:51233", "websockets host to connect to")
+	host = flag.String("host", "wss://xrpl.ws:443", "websockets host to connect to")
 )
 
 func main() {
 	flag.Parse()
 	fmt.Println("")
 	fmt.Println("瑞波账号删除，5.0XRP做为手续费销毁，其余XRP发送到接收账号")
-	var sec, destacct string
+	var srcacct, sec, destacct string
 	var tag uint32
+	fmt.Println("输入要删除的账号地址：")
+	fmt.Scanln(&srcacct)
+	src, err := data.NewAccountFromAddress(srcacct)
+	if err != nil {
+		fmt.Println("瑞波账号错误")
+		os.Exit(1)
+	}
+
 	fmt.Println("输入密钥：")
 	fmt.Scanln(&sec)
 
@@ -39,6 +47,7 @@ func main() {
 	}
 	key, _ := crypto.NewECDSAKey(seed.Payload())
 	zero := uint32(0)
+
 	fmt.Println("输入接收账号：")
 	fmt.Scanln(&destacct)
 	dest, err := data.NewAccountFromAddress(destacct)
@@ -56,10 +65,8 @@ func main() {
 	*trustflag = *trustflag | data.TxCanonicalSignature
 	r, err := websockets.NewRemote(*host)
 	checkErr(err, true)
-	var account data.Account
-	copy(account[:], key.Id(&zero))
 
-	airesult, err := r.AccountInfo(account)
+	airesult, err := r.AccountInfo(*src)
 	checkErr(err, true)
 	accountSequence := *airesult.AccountData.Sequence
 	ledgerSequence := airesult.LedgerSequence + 6
@@ -68,7 +75,7 @@ func main() {
 		DestinationTag: &tag,
 	}
 	tx.TxBase = data.TxBase{
-		Account:            account,
+		Account:            *src,
 		Fee:                *acctdelfee,
 		TransactionType:    data.ACCOUNT_DELETE,
 		Flags:              txflag,
