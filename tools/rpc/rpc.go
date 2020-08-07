@@ -11,15 +11,17 @@ import (
 )
 
 func main() {
+
 	seed, _ := crypto.NewRippleHashCheck("sapqGRrejEA8Z3mbAGqiuBNak4HHs", crypto.RIPPLE_FAMILY_SEED)
 	key, _ := crypto.NewECDSAKey(seed.Payload())
 	zero := uint32(0)
 	src, _ := data.NewAccountFromAddress("rpvsmj5w2iuFv78SyN44NcJt9nrskfRYCA")
 	dest, _ := data.NewAccountFromAddress("r3mQPV1CKHo67VdpUmu4iWVfyTxNTiDujn")
-	amount, _ := data.NewAmount("100/XRP")
+	amount, _ := data.NewAmount("1/XRP")
 	fee, _ := data.NewNativeValue(int64(12))
 	txflag := new(data.TransactionFlag)
 	*txflag = *txflag | data.TxCanonicalSignature
+
 	conn, err := grpc.Dial("test.xrp.xpring.io:50051", grpc.WithInsecure())
 	if err != nil {
 		fmt.Println(err.Error())
@@ -56,4 +58,5 @@ func main() {
 	}
 	resp, _ := client.SubmitTransaction(context.Background(), &submittx)
 	fmt.Println(resp)
+	fmt.Println(fmt.Sprintf("%X", resp.GetHash()))
 }
