@@ -6,7 +6,7 @@ import (
 
 	"github.com/yxxyun/ripple/crypto"
 	"github.com/yxxyun/ripple/data"
-	"github.com/yxxyun/ripple/rpc"
+	rpc "github.com/yxxyun/ripple/rpc/v1"
 	"google.golang.org/grpc"
 )
 
@@ -37,6 +37,7 @@ func main() {
 		Account: &addr,
 	}
 	acctinforesp, _ := client.GetAccountInfo(context.Background(), &acctinforeq)
+	fmt.Println(acctinforesp)
 	ledgerSequence := acctinforesp.GetLedgerIndex() + 3
 	accountSequence := acctinforesp.GetAccountData().GetSequence().GetValue()
 	tx := &data.Payment{
