@@ -169,18 +169,18 @@ type LedgerResult struct {
 	Ledger data.Ledger
 }
 
-type LedgerHeaderCommand struct {
-	*Command
-	Ledger interface{} `json:"ledger"`
-	Result *LedgerHeaderResult
-}
+// type LedgerHeaderCommand struct {
+// 	*Command
+// 	Ledger interface{} `json:"ledger"`
+// 	Result *LedgerHeaderResult
+// }
 
-type LedgerHeaderResult struct {
-	Ledger         data.Ledger
-	LedgerSequence uint32              `json:"ledger_index"`
-	Hash           *data.Hash256       `json:"ledger_hash,omitempty"`
-	LedgerData     data.VariableLength `json:"ledger_data"`
-}
+// type LedgerHeaderResult struct {
+// 	Ledger         data.Ledger
+// 	LedgerSequence uint32              `json:"ledger_index"`
+// 	Hash           *data.Hash256       `json:"ledger_hash,omitempty"`
+// 	LedgerData     data.VariableLength `json:"ledger_data"`
+// }
 
 type LedgerDataCommand struct {
 	*Command

@@ -51,28 +51,28 @@ func (s *MessagesSuite) TestLedgerResponse(c *C) {
 	c.Assert(tx0.MetaData.AffectedNodes, HasLen, 4)
 }
 
-func (s *MessagesSuite) TestLedgerHeaderResponse(c *C) {
-	msg := &LedgerHeaderCommand{}
-	readResponseFile(c, msg, "testdata/ledger_header.json")
+// func (s *MessagesSuite) TestLedgerHeaderResponse(c *C) {
+// 	msg := &LedgerHeaderCommand{}
+// 	readResponseFile(c, msg, "testdata/ledger_header.json")
 
-	// Response fields
-	c.Assert(msg.Status, Equals, "success")
-	c.Assert(msg.Type, Equals, "response")
+// 	// Response fields
+// 	c.Assert(msg.Status, Equals, "success")
+// 	c.Assert(msg.Type, Equals, "response")
 
-	// Result fields
-	c.Assert(len(msg.Result.LedgerData), Equals, 118)
-	c.Assert(msg.Result.LedgerSequence, Equals, uint32(32570))
-	c.Assert(msg.Result.Ledger.LedgerSequence, Equals, uint32(32570))
-	c.Assert(msg.Result.Ledger.Accepted, Equals, true)
-	c.Assert(msg.Result.Ledger.CloseTime.String(), Equals, "2013-Jan-01 03:21:10")
-	c.Assert(msg.Result.Ledger.Closed, Equals, true)
-	c.Assert(msg.Result.Ledger.Hash.String(), Equals, "4109C6F2045FC7EFF4CDE8F9905D19C28820D86304080FF886B299F0206E42B5")
-	c.Assert(msg.Result.Ledger.PreviousLedger.String(), Equals, "60A01EBF11537D8394EA1235253293508BDA7131D5F8710EFE9413AA129653A2")
-	c.Assert(msg.Result.Ledger.TotalXRP, Equals, uint64(99999999999996320))
-	c.Assert(msg.Result.Ledger.StateHash.String(), Equals, "3806AF8F22037DE598D30D38C8861FADF391171D26F7DE34ACFA038996EA6BEB")
-	c.Assert(msg.Result.Ledger.TransactionHash.String(), Equals, "0000000000000000000000000000000000000000000000000000000000000000")
-	c.Assert(msg.Result.Ledger.Transactions, HasLen, 0)
-}
+// 	// Result fields
+// 	c.Assert(len(msg.Result.LedgerData), Equals, 118)
+// 	c.Assert(msg.Result.LedgerSequence, Equals, uint32(32570))
+// 	c.Assert(msg.Result.Ledger.LedgerSequence, Equals, uint32(32570))
+// 	c.Assert(msg.Result.Ledger.Accepted, Equals, true)
+// 	c.Assert(msg.Result.Ledger.CloseTime.String(), Equals, "2013-Jan-01 03:21:10")
+// 	c.Assert(msg.Result.Ledger.Closed, Equals, true)
+// 	c.Assert(msg.Result.Ledger.Hash.String(), Equals, "4109C6F2045FC7EFF4CDE8F9905D19C28820D86304080FF886B299F0206E42B5")
+// 	c.Assert(msg.Result.Ledger.PreviousLedger.String(), Equals, "60A01EBF11537D8394EA1235253293508BDA7131D5F8710EFE9413AA129653A2")
+// 	c.Assert(msg.Result.Ledger.TotalXRP, Equals, uint64(99999999999996320))
+// 	c.Assert(msg.Result.Ledger.StateHash.String(), Equals, "3806AF8F22037DE598D30D38C8861FADF391171D26F7DE34ACFA038996EA6BEB")
+// 	c.Assert(msg.Result.Ledger.TransactionHash.String(), Equals, "0000000000000000000000000000000000000000000000000000000000000000")
+// 	c.Assert(msg.Result.Ledger.Transactions, HasLen, 0)
+// }
 
 func (s *MessagesSuite) TestTxResponse(c *C) {
 	msg := &TxCommand{}
