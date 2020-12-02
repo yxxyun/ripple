@@ -28,17 +28,26 @@ const (
 
 	// Time allowed to connect to server.
 	dialTimeout = 5 * time.Second
+
+	// time gap between reconnection
+	connReconnectInterval = 10 * time.Second
+
+	// server disconnect error message
+	ServerDisconnectErrorMsg = "Client Error -1 ws: server disconnected"
 )
 
 type Remote struct {
 	Incoming chan interface{}
 	outgoing chan Syncer
 	ws       *websocket.Conn
+	url      *url.URL
+	reConn   bool
+	Conn     bool
 }
 
 // NewRemote returns a new remote session connected to the specified
 // server endpoint URI. To close the connection, use Close().
-func NewRemote(endpoint string) (*Remote, error) {
+func NewRemote(endpoint string, enableReconnection bool) (*Remote, error) {
 	klog.Infoln(endpoint)
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -56,54 +65,119 @@ func NewRemote(endpoint string) (*Remote, error) {
 		Incoming: make(chan interface{}, 1000),
 		outgoing: make(chan Syncer, 10),
 		ws:       ws,
+		url:      u,
+		reConn:   enableReconnection,
 	}
 
 	go r.run()
 	return r, nil
 }
 
+// reConnect try to reconnect to server in case connection gets disconnected
+func (r *Remote) reConnect() {
+	klog.Info("reConnect!")
+	ticker := time.NewTicker(connReconnectInterval)
+	defer ticker.Stop()
+
+connectLoop:
+	for {
+		select {
+		case command, ok := <-r.outgoing:
+			if !ok {
+				klog.Errorln("outgoing channel closed")
+				return
+			}
+			command.Fail("ws: server disconnected")
+
+		// Time to reconnect
+		case <-ticker.C:
+			klog.Info("reConnect: Trying to reconnect")
+
+			c, err := net.DialTimeout("tcp", r.url.Host, dialTimeout)
+			if err != nil {
+				klog.Error("reConnect: DailTimeout Error: ", err)
+				continue
+			}
+			ws, _, err := websocket.NewClient(c, r.url, nil, 1024, 1024)
+			if err != nil {
+				klog.Error("reConnect: NewClient Error: ", err)
+				continue
+			}
+			r.ws = ws
+			r.Incoming = make(chan interface{}, 1000)
+			go r.run()
+			klog.Info("reConnect: successfull")
+			break connectLoop
+		}
+	}
+}
+
 // Close shuts down the Remote session and blocks until all internal
 // goroutines have been cleaned up.
 // Any commands that are pending a response will return with an error.
 func (r *Remote) Close() {
+	klog.Info("closing remote connection")
 	close(r.outgoing)
 
 	// Drain the Incoming channel and block until it is closed,
 	// indicating that this Remote is fully cleaned up.
 	for range r.Incoming {
 	}
+	r.Conn = false
 }
 
 // run spawns the read/write pumps and then runs until Close() is called.
 func (r *Remote) run() {
+	r.Conn = true
 	outbound := make(chan interface{})
 	inbound := make(chan []byte)
 	pending := make(map[uint64]Syncer)
+	timeout := make(chan uint64)
+	timeoutCancellers := make(map[uint64]chan struct{})
+	writePumpStopped := make(chan struct{})
 
 	defer func() {
 		close(outbound) // Shuts down the writePump
 		close(r.Incoming)
-
+		r.Conn = false
 		// Cancel all pending commands with an error
 		for _, c := range pending {
-			c.Fail("Connection Closed")
+			c.Fail("ws: server disconnected")
 		}
 
 		// Drain the inbound channel and block until it is closed,
 		// indicating that the readPump has returned.
 		for range inbound {
 		}
+
+		if r.reConn {
+			go r.reConnect()
+		}
+
 	}()
 
 	// Spawn read/write goroutines
 	go func() {
 		defer r.ws.Close()
+		defer close(writePumpStopped)
 		r.writePump(outbound)
 	}()
 	go func() {
 		defer close(inbound)
 		r.readPump(inbound)
 	}()
+
+	commandTimeoutFunc := func(commandID uint64, timeoutCanceller chan struct{}) {
+		timer := time.NewTimer(time.Minute)
+		select {
+		case <-timeoutCanceller:
+			timer.Stop()
+			return
+		case <-timer.C:
+			timeout <- commandID
+			return
+		}
+	}
 
 	// Main run loop
 	var response Command
@@ -113,9 +187,31 @@ func (r *Remote) run() {
 			if !ok {
 				return
 			}
-			outbound <- command
+			// outbound <- command
+			// add the command to "pending" so that it doesn't get stuck if writepump has stopped
 			id := reflect.ValueOf(command).Elem().FieldByName("Id").Uint()
 			pending[id] = command
+			// add cancellation before sending the command info
+			canceller := make(chan struct{})
+			timeoutCancellers[id] = canceller
+			// go func() {
+			// 	timer := time.NewTimer(time.Minute)
+			// 	select {
+			// 	case <-canceller:
+			// 		timer.Stop()
+			// 		return
+			// 	case <-timer.C:
+			// 		timeout <- id
+			// 		return
+			// 	}
+			// }()
+			select {
+			case <-writePumpStopped:
+				delete(timeoutCancellers, id) // never actually sent the command
+				return
+			case outbound <- command:
+				go commandTimeoutFunc(id, canceller)
+			}
 
 		case in, ok := <-inbound:
 			if !ok {
@@ -146,11 +242,25 @@ func (r *Remote) run() {
 				continue
 			}
 			delete(pending, response.Id)
+			if canceller, exists := timeoutCancellers[response.Id]; exists {
+				canceller <- struct{}{}
+				delete(timeoutCancellers, response.Id)
+			}
 			if err := json.Unmarshal(in, &cmd); err != nil {
 				klog.Errorln(err.Error())
+				cmd.Fail("error occured while unmarshalling")
 				continue
 			}
 			cmd.Done()
+
+		case id := <-timeout:
+			if cmd, exists := pending[id]; exists {
+				// this command has timed out
+				delete(pending, id)
+				cmd.Fail("command timed out")
+			}
+
+			delete(timeoutCancellers, id)
 		}
 	}
 }
@@ -535,6 +645,7 @@ func (r *Remote) readPump(inbound chan<- []byte) {
 		_, message, err := r.ws.ReadMessage()
 		if err != nil {
 			klog.Errorln(err)
+			r.Conn = false
 			return
 		}
 		klog.V(2).Infoln(dump(message))
