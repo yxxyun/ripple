@@ -43,7 +43,7 @@ func main() {
 	}
 	flag.CommandLine.Parse(os.Args[3:])
 
-	remote, err := websockets.NewRemote(*host)
+	remote, err := websockets.NewRemote(*host, false)
 	checkErr(err)
 	gets, err := data.NewAsset(os.Args[1])
 	checkErr(err)

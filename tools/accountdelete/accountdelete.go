@@ -63,7 +63,7 @@ func main() {
 	trustflag := new(data.TransactionFlag)
 	*trustflag = *trustflag | data.TxSetNoRipple
 	*trustflag = *trustflag | data.TxCanonicalSignature
-	r, err := websockets.NewRemote(*host)
+	r, err := websockets.NewRemote(*host, false)
 	checkErr(err, true)
 
 	airesult, err := r.AccountInfo(*src)

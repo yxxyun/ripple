@@ -87,7 +87,7 @@ func main() {
 		checkErr(err, true)
 	}
 
-	r, err := websockets.NewRemote(*host)
+	r, err := websockets.NewRemote(*host, false)
 	checkErr(err, true)
 	switch flag.NArg() {
 	case 0:

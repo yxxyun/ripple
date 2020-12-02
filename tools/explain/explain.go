@@ -96,7 +96,7 @@ func main() {
 	}
 	flags.Parse(os.Args[2:])
 	matches := argumentRegex.FindStringSubmatch(os.Args[1])
-	r, err := websockets.NewRemote(*host)
+	r, err := websockets.NewRemote(*host, false)
 	checkErr(err)
 	klog.Infoln("Connected to: ", *host)
 	switch {
