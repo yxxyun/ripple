@@ -81,7 +81,7 @@ func (s ActionSlice) Prepare() error {
 }
 
 func (s ActionSlice) Submit(host string) error {
-	remote, err := websockets.NewRemote(host)
+	remote, err := websockets.NewRemote(host, false)
 	if err != nil {
 		return err
 	}
