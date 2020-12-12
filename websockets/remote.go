@@ -30,7 +30,7 @@ const (
 	dialTimeout = 5 * time.Second
 
 	// time gap between reconnection
-	connReconnectInterval = 10 * time.Second
+	connReconnectInterval = 1 * time.Second
 
 	// server disconnect error message
 	ServerDisconnectErrorMsg = "Client Error -1 ws: server disconnected"
