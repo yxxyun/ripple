@@ -15,7 +15,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
-	"github.com/rubblelabs/ripple/data"
+	"github.com/yxxyun/ripple/data"
 )
 
 const (
@@ -169,6 +169,14 @@ func (r *Remote) Tx(hash data.Hash256) (*TxResult, error) {
 		return nil, cmd.CommandError
 	}
 	return cmd.Result, nil
+}
+
+// Ping sends a ping to the server and waits for a pong. Used for connection active/alive checks in low frequency sockets for early error detection (reduce chance of dead sockets)
+func (r *Remote) Ping() error {
+	if err := r.ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *Remote) accountTx(account data.Account, c chan *data.TransactionWithMetaData, pageSize int, minLedger, maxLedger int64) {
@@ -447,6 +455,23 @@ func (r *Remote) AccountOffers(account data.Account, ledgerIndex interface{}) (*
 	}
 }
 
+func (r *Remote) AMMInfo(asset data.Asset, asset2 data.Asset) (*AMMInfoResult, error) {
+	cmd := &AMMInfoCommand{
+		Command: newCommand("amm_info"),
+		Asset:   asset,
+		Asset2:  asset2,
+	}
+	r.outgoing <- cmd
+	<-cmd.Ready
+	if cmd.CommandError != nil {
+		return nil, cmd.CommandError
+	}
+	if cmd.Result == nil {
+		return nil, fmt.Errorf("missing AMM info")
+	}
+	return cmd.Result, nil
+}
+
 func (r *Remote) BookOffers(taker data.Account, ledgerIndex interface{}, pays, gets data.Asset) (*BookOffersResult, error) {
 	cmd := &BookOffersCommand{
 		Command:     newCommand("book_offers"),
@@ -454,7 +479,7 @@ func (r *Remote) BookOffers(taker data.Account, ledgerIndex interface{}, pays, g
 		Taker:       taker,
 		TakerPays:   pays,
 		TakerGets:   gets,
-		Limit:       5000, // Marker not implemented....
+		Limit:       10, // Marker not implemented....
 	}
 	r.outgoing <- cmd
 	<-cmd.Ready
