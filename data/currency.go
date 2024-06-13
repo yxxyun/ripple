@@ -42,7 +42,8 @@ func NewCurrency(s string) (Currency, error) {
 		copy(currency[:], c)
 		return currency, nil
 	default:
-		return currency, fmt.Errorf("Bad Currency: %s", s)
+		copy(currency[:], []byte(s))
+		return currency, nil
 	}
 }
 
