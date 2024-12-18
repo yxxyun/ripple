@@ -1,7 +1,6 @@
 package data
 
 import (
-	"encoding/hex"
 	"fmt"
 	"sort"
 	"strings"
@@ -22,20 +21,10 @@ func NewAsset(s string) (*Asset, error) {
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("bad asset: %s", s)
 	}
-	if len(parts[0]) == 3 {
-		return &Asset{
-			Currency: parts[0],
-			Issuer:   parts[1],
-		}, nil
-	} else {
-		hx := hex.EncodeToString([]byte(parts[0]))
-		//Currency_code = strings.ToUpper(hx) + strings.Repeat("0", 40-len(hx))
-		return &Asset{
-			Currency: strings.ToUpper(hx) + strings.Repeat("0", 40-len(hx)),
-			Issuer:   parts[1],
-		}, nil
-	}
-
+	return &Asset{
+		Currency: parts[0],
+		Issuer:   parts[1],
+	}, nil
 }
 
 func (a *Asset) IsNative() bool {
